@@ -7,7 +7,7 @@ from sqlalchemy.exc import SQLAlchemyError, PendingRollbackError, IntegrityError
 from pprint import pprint
 import configparser
 
-DSN = 'postgresql://postgres:voimant11@localhost:5432/users_vk_db'
+DSN = 'postgresql://postgres:ваш пароль@localhost:5432/users_vk_db'
 engine = sqlalchemy.create_engine(DSN)
 
 create_tables(engine)
