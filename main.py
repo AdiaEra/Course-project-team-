@@ -15,7 +15,7 @@ keyboard = VkKeyboard(one_time=True)
 keyboard.add_button('Поиск', color=VkKeyboardColor.SECONDARY)
 keyboard.add_button('🥰Избранное🥰', color=VkKeyboardColor.POSITIVE)
 keyboard.add_line()
-keyboard.add_button('Черный список', color=VkKeyboardColor.POSITIVE)
+keyboard.add_button('Далее', color=VkKeyboardColor.POSITIVE)
 keyboard.add_button('Добавить в избранное', color=VkKeyboardColor.POSITIVE)
 
 keyboard2 = VkKeyboard(one_time=True)
