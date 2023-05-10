@@ -93,3 +93,6 @@ if __name__ == '__main__':
                 elif request.lower() == '🥰избранное🥰':
                     liked_users = main_bd.get_liked_user(sender)
                     get_write_msg(sender, f'{liked_users}')
+                   
+                else:
+                    get_write_msg(sender, HELP)
