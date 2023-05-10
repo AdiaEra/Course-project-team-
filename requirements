@@ -1,0 +1,7 @@
+vk_api
+configparser
+requests
+sqlalchemy
+pprint
+random
+psycopg2
