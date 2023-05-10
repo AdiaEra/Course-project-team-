@@ -1,61 +1,95 @@
-import sqlalchemy
-from sqlalchemy.orm import sessionmaker
+import requests
+import main_bd
+import vk_api
+from vk_api.keyboard import VkKeyboard, VkKeyboardButton, VkKeyboardColor
+from vk_api.longpoll import VkLongPoll, VkEventType
+from vk_api.utils import get_random_id
+import vk_search
+import configparser
 
-from models import create_tables, User, Like, NotLike
+config = configparser.ConfigParser()  # создаём объекта парсера
+config.read("settings.ini")  # читаем конфиг
+TOKEN = config['DEFAULT']['vk_group_token']
 
-DSN = 'postgresql://postgres:Hun$917&305TpS@localhost:5432/users_vk_db'
-engine = sqlalchemy.create_engine(DSN)
+keyboard = VkKeyboard(one_time=True)
+keyboard.add_button('Поиск', color=VkKeyboardColor.SECONDARY)
+keyboard.add_button('🥰Избранное🥰', color=VkKeyboardColor.POSITIVE)
+keyboard.add_line()
+keyboard.add_button('Черный список', color=VkKeyboardColor.POSITIVE)
+keyboard.add_button('Добавить в избранное', color=VkKeyboardColor.POSITIVE)
 
-create_tables(engine)
-
-Session = sessionmaker(bind=engine)
-session = Session()
-
-
-class Service:
-    def __init__(self, session):
-        self.session = session
-
-    def insert_user(self, id: int):
-        try:
-            user = User(id=id)
-            # session.add(user)
-            session.commit()
-            print('пользователь добавлен в базу')
-        except:
-            print('такой пользователь есть в базе')
-        return user
-
-    def insert_liked(self, liked_id: int, first_name: str, last_name: str, age: int, link: str, users_id: int):
-        like = Like(liked_id=liked_id, first_name=first_name, last_name=last_name, age=age, link=link,
-                    users_id=user1.id)
-        # session.add(like)
-        session.commit()
-        return like
-
-    def insert_not_liked(self, not_liked_id: int, users_id: int):
-        not_like = NotLike(not_liked_id=not_liked_id, users_id=user1.id)
-        # session.add(not_like)
-        session.commit()
-        return not_like
-
-    def delete_user(self, user):  # что прописать?
-        session.query(User).filter(User.id == 11).delete()
-        session.commit()
-        print('пользователь удалён')
-
-    def liked_users(self, data):  # ???
-        return self.session.query(Like)
+keyboard2 = VkKeyboard(one_time=True)
+keyboard2.add_button('Далее', color=VkKeyboardColor.SECONDARY)
+keyboard2.add_button('Добавить в избранное', color=VkKeyboardColor.POSITIVE)
+keyboard2.add_button('🥰Избранное🥰', color=VkKeyboardColor.POSITIVE)
 
 
-service = Service(session)
-user1 = service.insert_user(9)
-liked1 = service.insert_liked(67767676754, 'kjhuhgyubyvty', 'hdtjhg', 22, 'https//ijinuyugu9889786', users_id=user1.id)
-nliked1 = service.insert_not_liked(778999897896764, users_id=user1.id)
+def get_write_msg(user_id, message):
+    vk.method('messages.send', {'user_id': user_id,
+                                'message': message,
+                                'random_id': get_random_id(),
+                                'keyboard': keyboard.get_keyboard()})
 
-# del_user = service.delete_user(user1)
 
-# for n in service.liked_users(liked1):
-#     print(n)
+def get_link_mess(user_id, message, link):
+    vk.method('messages.send', {'user_id': user_id,
+                                'message': message,
+                                'attachment': link,
+                                'random_id': get_random_id(),
+                                'keyboard': keyboard2.get_keyboard()})
 
-session.close()
+
+def get_save_arg(log_l):
+    for event in log_l.listen():
+        if event.type == VkEventType.MESSAGE_NEW and event.to_me and event.text:
+            request = event.text
+            msg = event.text
+            sender = event.user_id
+            if request.lower() != '':
+                return request
+            break
+
+
+HELP = """напиши слово  поиск для начала работы бота"""
+
+if __name__ == '__main__':
+
+    vk = vk_api.VkApi(token=TOKEN)
+    longpoll = VkLongPoll(vk)
+    # db = Service(session)
+    print('Бот запущен')
+    while True:
+        for event in longpoll.listen():
+            if event.type == VkEventType.MESSAGE_NEW and event.to_me and event.text:
+                request = event.text
+                msg = event.text
+                sender = event.user_id
+                if request.lower() == 'поиск':
+                    get_write_msg(sender, 'Какой у вас город?')
+                    city = get_save_arg(longpoll)
+                    get_write_msg(sender, 'Какой возраст предпочитаете? ')
+                    age = get_save_arg(longpoll)
+                    get_write_msg(sender, 'Сейчас поищем...')
+                    x = vk_search.search_open_profile(sender, city, age)
+                    name_last = vk_search.name_love(x)
+                    photos = vk_search.photo_user(x)
+                    get_write_msg(sender, f'влюбитесь и радуйтесь https://vk.com/id{x}')
+                    get_write_msg(sender, f'{name_last["last_name"]} {name_last["first_name"]}')
+                    get_link_mess(sender, " ", photos)
+                    linked = f'https://vk.com/id{x}'
+                elif request.lower() == 'далее':
+                    x = vk_search.search_open_profile(sender, city, age)
+                    name_last = vk_search.name_love(x)
+                    photos = vk_search.photo_user(x)
+                    get_write_msg(sender, f'{name_last["last_name"]} {name_last["first_name"]}')
+                    get_write_msg(sender, f'влюбитесь и радуйтесь https://vk.com/id{x}')
+                    get_link_mess(sender, " ", photos)
+
+                elif request.lower() == 'добавить в избранное':
+                    insert = main_bd.open_base(sender, x, name_last["first_name"], name_last["last_name"], age, linked)
+                    get_write_msg(sender, 'Добавил в избранное')
+
+
+                elif request.lower() == '🥰избранное🥰':
+                    liked_users = main_bd.get_liked_user(sender)
+                    get_write_msg(sender, f'{liked_users}')
