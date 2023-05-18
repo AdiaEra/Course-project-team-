@@ -101,7 +101,7 @@ class VkbackUp():
                 list_id.append(dicts['id'])
             else:
                 continue
-        id_s = list_id[random.randint(0, len(list_id))]
+        id_s = list_id[random.randint(0, len(list_id) - 1)]
         pprint(id_s)
         return id_s
 
