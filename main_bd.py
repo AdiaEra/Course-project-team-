@@ -7,7 +7,7 @@ from sqlalchemy.exc import SQLAlchemyError, PendingRollbackError, IntegrityError
 from pprint import pprint
 import configparser
 
-DSN = 'postgresql://postgres:voimant11@localhost:5432/users_vk_db'
+DSN = 'postgresql://postgres:ваш пароль@localhost:5432/users_vk_db'
 engine = sqlalchemy.create_engine(DSN)
 
 create_tables(engine)
@@ -98,10 +98,4 @@ def get_liked_user(user_id):
     return str(list_1).strip('[]').replace(',', '')
 
 
-# service = Service(session)
-# service.insert_user(567)
-# service.insert_liked(897, 567, 'uiui', 'jhbu', 35, 'https//ijinuyugu9889786')
-#
-# for n in service.liked_users(888):
-#     print(n)
 session.close()

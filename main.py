@@ -11,7 +11,6 @@ TOKEN = config['DEFAULT']['vk_group_token']
 
 
 
-HELP = """нажми на кнопку  [поиск] или напиши "поиск" для начала работы бота"""
 
 if __name__ == '__main__':
     vkt = Vkinder(TOKEN)
@@ -63,7 +62,9 @@ if __name__ == '__main__':
 
                 elif request.lower() == '🥰избранное🥰':
                     liked_users = main_bd.get_liked_user(sender)
+
                     vkt.get_write_msg(sender, f'{liked_users}')
 
                 else:
                     vkt.get_write_msg(sender, HELP)
+
