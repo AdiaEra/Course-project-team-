@@ -98,10 +98,5 @@ def get_liked_user(user_id):
     return str(list_1).strip('[]').replace(',', '')
 
 
-# service = Service(session)
-# service.insert_user(567)
-# service.insert_liked(897, 567, 'uiui', 'jhbu', 35, 'https//ijinuyugu9889786')
-#
-# for n in service.liked_users(888):
-#     print(n)
+
 session.close()
